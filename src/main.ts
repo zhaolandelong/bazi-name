@@ -26,6 +26,8 @@ function main(options: Options) {
     new Set(filterdNumsData.map((data) => data.nums).flat())
   );
 
+  const resObj: Record<string, { second: string[]; last: string[] }> = {};
+
   filterdNumsData.forEach((numData) => {
     numData.nums.forEach((num) => {
       const rest = num - surStks;
@@ -33,6 +35,7 @@ function main(options: Options) {
         chars.forEach((secd) => {
           const manScore = surStks + secd.strokes;
           const lastRest = rest - secd.strokes;
+
           if (
             allGoodNums.includes(manScore) &&
             lastRest > 0 &&
@@ -50,8 +53,19 @@ function main(options: Options) {
                   secondNameData: secd,
                   lastnameData: last,
                 });
+                const wuge = `总${total}人${man}地${earth}天${cosmos}外${outside}`;
+                if (!Object.prototype.hasOwnProperty.call(resObj, wuge)) {
+                  resObj[wuge] = { second: [], last: [] };
+                }
+                if (!resObj[wuge].second.includes(secd.char + secd.sound)) {
+                  resObj[wuge].second.push(secd.char + secd.sound);
+                }
+                if (!resObj[wuge].last.includes(last.char + last.sound)) {
+                  resObj[wuge].last.push(last.char + last.sound);
+                }
+
                 result.push(
-                  `${secd.char}${last.char}（${secd.sound}，${last.sound}）：总${total}人${man}地${earth}天${cosmos}外${outside}`
+                  `${secd.char}${last.char}（${secd.sound}，${last.sound}）：${wuge}`
                 );
               }
             });
@@ -60,7 +74,7 @@ function main(options: Options) {
       }
     });
   });
-  return result;
+  return { result, resObj };
 }
 
 inquirer
@@ -89,6 +103,7 @@ inquirer
       type: "list",
       name: "secdEle",
       message: "中间（第二个）字的属性（The element of middle char）：",
+      default: 2,
       choices: [
         { name: "木（wood）", value: Ele.wood },
         { name: "火（fire）", value: Ele.fire },
@@ -101,6 +116,7 @@ inquirer
       type: "list",
       name: "lastEle",
       message: "最后一个字的属性（The element of last char）：",
+      default: 2,
       choices: [
         { name: "木（wood）", value: Ele.wood },
         { name: "火（fire）", value: Ele.fire },
@@ -135,13 +151,17 @@ inquirer
       minScore,
     };
 
-    const result = main(options);
+    const { result, resObj } = main(options);
 
-    const fileName = `./result-${surname}-${Ele[secdEle]}-${Ele[lastEle]}-${Sex[sex]}-${minScore}.json`;
-    
-    console.log(`成功：请查看 ${fileName} 文件（Success: Please watch the file）。`);
+    const resultFileName = `./result-${surname}-${Ele[secdEle]}-${Ele[lastEle]}-${Sex[sex]}-${minScore}.json`;
+    const resObjFileName = `./resObj-${surname}-${Ele[secdEle]}-${Ele[lastEle]}-${Sex[sex]}-${minScore}.json`;
 
-    fs.writeFileSync(fileName, JSON.stringify(result, null, 2));
+    console.log(
+      `成功：请查看 ${resultFileName}、${resObjFileName} 文件（Success: Please watch the file）。`
+    );
+
+    fs.writeFileSync(resultFileName, JSON.stringify(result, null, 2));
+    fs.writeFileSync(resObjFileName, JSON.stringify(resObj, null, 2));
   })
   .catch((e) => {
     console.error(e);
