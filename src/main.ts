@@ -29,43 +29,41 @@ function main(options: Options) {
   const resObj: Record<string, { second: string[]; last: string[] }> = {};
 
   filterdNumsData.forEach((numData) => {
-    numData.nums.forEach((num) => {
-      const rest = num - surStks;
-      if (rest > 1) {
+    numData.nums.forEach((totalScore) => {
+      const earthScore = totalScore - surStks;
+      if (allGoodNums.includes(earthScore)) {
         chars.forEach((secd) => {
           const manScore = surStks + secd.strokes;
-          const lastRest = rest - secd.strokes;
+          const lastRest = earthScore - secd.strokes;
 
           if (
-            allGoodNums.includes(manScore) &&
             lastRest > 0 &&
-            secd.ele === eles[0]
+            secd.ele === eles[0] &&
+            allGoodNums.includes(manScore)
           ) {
             chars.forEach((last) => {
-              const earthScore = secd.strokes + last.strokes;
               if (
-                allGoodNums.includes(earthScore) &&
-                last.ele === eles[1] &&
-                lastRest === last.strokes
+                lastRest === last.strokes &&
+                last.ele === eles[1]
               ) {
                 const { cosmos, man, earth, outside, total } = getNameScore({
                   surnameData,
                   secondNameData: secd,
                   lastnameData: last,
                 });
-                const wuge = `总${total}人${man}地${earth}天${cosmos}外${outside}`;
-                if (!Object.prototype.hasOwnProperty.call(resObj, wuge)) {
-                  resObj[wuge] = { second: [], last: [] };
+                const fiveRes = `总${total}人${man}地${earth}天${cosmos}外${outside}`;
+                if (!Object.prototype.hasOwnProperty.call(resObj, fiveRes)) {
+                  resObj[fiveRes] = { second: [], last: [] };
                 }
-                if (!resObj[wuge].second.includes(secd.char + secd.sound)) {
-                  resObj[wuge].second.push(secd.char + secd.sound);
+                if (!resObj[fiveRes].second.includes(secd.char + secd.sound)) {
+                  resObj[fiveRes].second.push(secd.char + secd.sound);
                 }
-                if (!resObj[wuge].last.includes(last.char + last.sound)) {
-                  resObj[wuge].last.push(last.char + last.sound);
+                if (!resObj[fiveRes].last.includes(last.char + last.sound)) {
+                  resObj[fiveRes].last.push(last.char + last.sound);
                 }
 
                 result.push(
-                  `${secd.char}${last.char}（${secd.sound}，${last.sound}）：${wuge}`
+                  `${secd.char}${last.char}（${secd.sound}，${last.sound}）：${fiveRes}`
                 );
               }
             });
